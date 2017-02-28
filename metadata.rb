@@ -13,7 +13,6 @@ depends          "flink"
 depends          "hadoop_spark"
 depends          "ndb"
 depends          "hops"
-depends          "apache_hadoop"
 depends          "kagent"
 depends          "java"
 
@@ -32,6 +31,10 @@ attribute "java/install_flavor",
 
 attribute "zeppelin/user",
           :description => "User to install/run zeppelin as",
+          :type => 'string'
+
+attribute "zeppelin/group",
+          :description => "Group to install/run zeppelin as",
           :type => 'string'
 
 attribute "zeppelin/dir",
