@@ -9,8 +9,6 @@
 
 include_recipe "java"
 
-include_recipe "hops::wrap"
-
 
 user node.zeppelin.user do
   home "/home/#{node.zeppelin.user}"
@@ -26,8 +24,6 @@ group node.zeppelin.group do
    members ["#{node.zeppelin.user}"]
   append true
 end
-
-
 
 package_url = "#{node.zeppelin.url}"
 base_package_filename = File.basename(package_url)
@@ -81,7 +77,7 @@ template "#{node.zeppelin.home}/conf/zeppelin-env.sh" do
   mode 0655
   variables({ 
         :private_ip => my_ip,
-        :hadoop_dir => node.apache_hadoop.base_dir,
+        :hadoop_dir => node.hops.base_dir,
         :spark_dir => node.hadoop_spark.base_dir
            })
 end
@@ -96,7 +92,7 @@ template "#{node.zeppelin.home}/conf/interpreter.json" do
   group node.zeppelin.group
   mode 0655
   variables({ 
-        :hadoop_home => node.apache_hadoop.base_dir,
+        :hadoop_home => node.hops.base_dir,
         :spark_home => node.hadoop_spark.base_dir,
         :zeppelin_home => node.zeppelin.base_dir,
         :version => node.zeppelin.version
