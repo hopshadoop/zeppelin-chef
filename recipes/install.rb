@@ -39,13 +39,38 @@ directory node['zeppelin']['dir'] do
 end
 
 
+# Zeppelin
 package_url = "#{node['zeppelin']['url']}"
 base_package_filename = File.basename(package_url)
-cached_package_filename = "#{Chef::Config['file_cache_path']}/#{base_package_filename}"
+cached_zeppelin_filename = "#{Chef::Config['file_cache_path']}/#{base_package_filename}"
 
-remote_file cached_package_filename do
+remote_file cached_zeppelin_filename do
   source package_url
+  owner "#{node['zeppelin']['user']}"
   checksum node['zeppelin']['checksum']
+  mode "0644"
+  action :create_if_missing
+end
+
+# Zeppelin HopsHive interpreter
+package_url = "#{node['zeppelin']['hopshive_interpreter']}"
+base_package_filename = File.basename(package_url)
+cached_hopshive_int_filename = "#{Chef::Config[:file_cache_path]}/#{base_package_filename}"
+
+remote_file cached_hopshive_int_filename do
+  source package_url
+  owner "#{node['zeppelin']['user']}"
+  mode "0644"
+  action :create_if_missing
+end
+
+# HopsHive JDBC connector
+package_url = "#{node['zeppelin']['hopshive_jdbc']}"
+base_package_filename = File.basename(package_url)
+cached_hopshive_jdbc_filename = "#{Chef::Config[:file_cache_path]}/#{base_package_filename}"
+
+remote_file cached_hopshive_jdbc_filename do
+  source package_url
   owner node['zeppelin']['user']
   mode "0644"
   action :create_if_missing
@@ -59,12 +84,11 @@ bash 'extract-zeppelin' do
         code <<-EOH
                 set -e
                 cd #{Chef::Config['file_cache_path']}
-                tar -xf #{cached_package_filename} -C #{Chef::Config['file_cache_path']}
+                tar -xf #{cached_zeppelin_filename} -C #{Chef::Config['file_cache_path']}
                 mv #{Chef::Config['file_cache_path']}/zeppelin-#{node['zeppelin']['version']} #{node['zeppelin']['dir']}
                 mkdir -p #{node['zeppelin']['home']}/run
-                wget http://snurran.sics.se/hops/zeppelin-interpreter.tgz
-                tar -xf zeppelin-interpreter.tgz
-                mv zeppelin-interpreter #{node['zeppelin']['home']}
+                tar -xf #{cached_hopshive_int_filename} -C #{node['zeppelin']['home']}/interpreter
+                cp #{cached_hopshive_jdbc_filename} #{node['zeppelin']['home']}/interpreter/hopshive/
                 chown -R #{node['zeppelin']['user']}:#{node['hops']['group']} #{node['zeppelin']['home']}
                 chmod 770 #{node['zeppelin']['home']}
                 touch #{zeppelin_down}
@@ -112,7 +136,7 @@ template "#{node['zeppelin']['home']}/conf/interpreter.json" do
         :spark_home => node['hadoop_spark']['base_dir'],
         :zeppelin_home => node['zeppelin']['base_dir'],
         :version => node['zeppelin']['version']
-           })
+  })
 end
 
 template "#{node['zeppelin']['home']}/bin/alive.sh" do
