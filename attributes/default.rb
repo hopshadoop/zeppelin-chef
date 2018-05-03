@@ -5,7 +5,7 @@ include_attribute "flink"
 include_attribute "hive2"
 
 default['zeppelin']['version']             = "0.8.0-SNAPSHOT"
-default['zeppelin']['spark_version']       = node['hadoop_spark']['version']
+default['zeppelin']['spark_version']       = "2.2.0"
 default['zeppelin']['hadoop_version']      = "2.7"
 default['zeppelin']['name']                = "zeppelin-#{node['zeppelin']['version']}-bin-spark-#{node['zeppelin']['spark_version']}_hadoop-#{node['zeppelin']['hadoop_version']}"
 default['zeppelin']['user']                = node['hops']['yarn']['user']
